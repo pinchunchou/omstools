@@ -3,7 +3,7 @@ import util.utility as u
 
 fout = open("rate_monitoring.csv", "w")
 
-ls_delta = 163 # The starting lumisection after stable beam. 
+ls_delta = 0 # The starting lumisection after stable beam. 
 #For example, stable beam start at 7, so if ls_delta=163 we will start from lumisection 7+163=170.
 ls_num_to_avg = 20 # How many lumisections to be averaged. 
 
@@ -69,7 +69,6 @@ for runnum in runnums:
 
 		rate = 0
 		for i in range(ls_num_to_avg):
-			#rate += l1_data['data'][i]['attributes']['post_dt_rate']
 			rate += q_l1.data().json()["data"][i]['attributes']['post_dt_rate']
 		
 		rate/=ls_num_to_avg
@@ -83,7 +82,6 @@ for runnum in runnums:
 		
 		rate = 0
 		for i in range(ls_num_to_avg):
-			#rate += hlt_data['data'][i]['attributes']['rate']
 			rate += q_hlt.data().json()['data'][i]['attributes']['rate']
 		
 		rate/=ls_num_to_avg
