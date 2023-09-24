@@ -2,7 +2,7 @@
 
 ## Install
 ```
-git clone git@github.com:boundino/omstools.git
+git clone git@github.com:pinchunchou/omstools.git
 cd omstools/
 ```
 * Add requirements
