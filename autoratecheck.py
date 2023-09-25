@@ -54,8 +54,6 @@ for runnum in runnums:
 	q_lumi.filter("run_number", runnum).filter("beams_stable", 'true')
 	ls_start = q_lumi.data().json()["data"][0]['attributes']['lumisection_number']
 
-	url = "https://cmsoms.cern.ch/agg/api/v1/runs/" + str(runnum) + "/lumisections?filter[beams_stable]=true"
-
 	print('Stable beam start at lumisection',ls_start)
 	ls_start+=ls_delta
 	print('We start at lumisection',ls_start)
