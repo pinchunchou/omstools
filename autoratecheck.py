@@ -3,12 +3,14 @@ import util.utility as u
 
 fout = open("rate_monitoring.csv", "w")
 
-ls_delta = 10 # The starting lumisection after stable beam. 
+#ls_start = 106 # 0 if we want to start at stable beam.
+ls_starts = [1,56]
+ls_delta = 1 # The starting lumisection after stable beam. 
 #For example, stable beam start at 7, so if ls_delta=163 we will start from lumisection 7+163=170.
-ls_num_to_avg = 50 # How many lumisections to be averaged. 
+ls_num_to_avg = 20 # How many lumisections to be averaged. 
 
 #runnums = [373710] # Run numbers to be used
-runnums = [374322,374323] # Run numbers to be used
+runnums = [374345,374347] # Run numbers to be used
 
 
 #ppref paths
@@ -30,20 +32,27 @@ l1_paths = ["L1_ZeroBias","L1_SingleEG15","L1_SingleEG21","L1_SingleEG30","L1_Do
 
 #PbPb paths
 hlt_paths = [
-"HLT_HIGEDPhoton10_v8", "HLT_HIGEDPhoton20_v8", "HLT_HIGEDPhoton30_v8",
-"HLT_HIGEDPhoton40_v8", "HLT_HIGEDPhoton50_v8", "HLT_HIGEDPhoton60_v8", 
-"HLT_HIGEDPhoton10_EB_v8", "HLT_HIGEDPhoton20_EB_v8", "HLT_HIGEDPhoton30_EB_v8",
-"HLT_HIGEDPhoton40_EB_v8", "HLT_HIGEDPhoton50_EB_v8", "HLT_HIGEDPhoton60_EB_v8",
-"HLT_HIDoubleGEDPhoton20_v1",
-"HLT_HIEle10Gsf_v8", "HLT_HIEle15Gsf_v8", "HLT_HIEle20Gsf_v8", "HLT_HIEle30Gsf_v8", 
-"HLT_HIEle40Gsf_v8", "HLT_HIEle50Gsf_v8",
-"HLT_HIEle15Ele10Gsf_v8", "HLT_HIEle15Ele10GsfMass50_v8",
-"HLT_HIDoubleEle10Gsf_v8", "HLT_HIDoubleEle10GsfMass50_v8",
-"HLT_HIDoubleEle15Gsf_v8", "HLT_HIDoubleEle15GsfMass50_v8",
+"HLT_HIGEDPhoton10_v9", "HLT_HIGEDPhoton20_v9", "HLT_HIGEDPhoton30_v9",
+"HLT_HIGEDPhoton40_v9", "HLT_HIGEDPhoton50_v9", "HLT_HIGEDPhoton60_v9", 
+"HLT_HIGEDPhoton10_EB_v9", "HLT_HIGEDPhoton20_EB_v9", "HLT_HIGEDPhoton30_EB_v9",
+"HLT_HIGEDPhoton40_EB_v9", "HLT_HIGEDPhoton50_EB_v9", "HLT_HIGEDPhoton60_EB_v9",
+"HLT_HIDoubleGEDPhoton20_v2",
+"HLT_HIEle10Gsf_v9", "HLT_HIEle15Gsf_v9", "HLT_HIEle20Gsf_v9", "HLT_HIEle30Gsf_v9", 
+"HLT_HIEle40Gsf_v9", "HLT_HIEle50Gsf_v9",
+"HLT_HIEle15Ele10Gsf_v9", "HLT_HIEle15Ele10GsfMass50_v9",
+"HLT_HIDoubleEle10Gsf_v9", "HLT_HIDoubleEle10GsfMass50_v9",
+"HLT_HIDoubleEle15Gsf_v9", "HLT_HIDoubleEle15GsfMass50_v9",
 ] 
 
-l1_paths = ["L1_ZeroBias","L1_SingleEG7_BptxAND","L1_SingleEG15_BptxAND","L1_SingleEG21_BptxAND","L1_SingleEG30_BptxAND","L1_DoubleEG5_BptxAND"]
 
+hlt_paths += ["HLT_HIL1SingleMu5_SingleEG20Gsf_v2",
+"HLT_HIL1SingleMu5_SingleGEDPhoton20_v2",
+"HLT_HIL1SingleMu7_SingleEG20Gsf_v2",
+"HLT_HIL1SingleMu7_SingleGEDPhoton10_v2"]
+
+l1_paths = ["L1_ZeroBias","L1_MinimumBiasHF1_AND_BptxAND","L1_SingleEG7_BptxAND","L1_SingleEG15_BptxAND","L1_SingleEG21_BptxAND","L1_SingleEG30_BptxAND","L1_DoubleEG5_BptxAND"]
+
+l1_paths += ["L1_SingleMu3_SingleEG12_BptxAND","L1_SingleMu5_SingleEG15_BptxAND","L1_SingleMu7_SingleEG10_BptxAND"]
 path_txt = "Run,"
 
 for path in l1_paths:
@@ -68,17 +77,23 @@ q_hlt = omsapi.query("hltpathrates")
 q_hlt.paginate(per_page = 3000)
 q_hlt.set_verbose(False)
 
+r_id = 0
+
 for runnum in runnums:
 	print('run:',runnum)
 
 	q_lumi.clear_filter()
 	q_lumi.filter("run_number", runnum).filter("beams_stable", 'true')
-	ls_start = q_lumi.data().json()["data"][0]['attributes']['lumisection_number']
+	ls_stable_start = q_lumi.data().json()["data"][0]['attributes']['lumisection_number']
 	#ls_start=1
 	#https://cmsoms.cern.ch/agg/api/v1/runs/373710/lumisections?filter[beams_stable]=true
 
-	print('Stable beam start at lumisection',ls_start)
-	ls_start+=ls_delta
+	ls_start = ls_starts[r_id]
+
+	print('Stable beam start at lumisection',ls_stable_start)
+	if(ls_start==0):
+		ls_start = ls_stable_start+ls_delta
+
 	print('We start at lumisection',ls_start)
 	print('Number of lumisections used to average:',ls_num_to_avg)
 
@@ -92,8 +107,10 @@ for runnum in runnums:
 
 		rate = 0
 		for i in range(ls_num_to_avg):
-			rate += q_l1.data().json()["data"][i]['attributes']['post_dt_rate']
-			#rate += q_l1.data().json()["data"][i]['attributes']['pre_dt_before_prescale_rate']
+			if "MinimumBias" in l1_path:
+				rate += q_l1.data().json()["data"][i]['attributes']['pre_dt_before_prescale_rate']
+			else:
+				rate += q_l1.data().json()["data"][i]['attributes']['post_dt_rate']
 		
 		rate/=ls_num_to_avg
 		print(l1_path,"rate:",rate)
@@ -104,8 +121,8 @@ for runnum in runnums:
 		q_hlt.clear_filter()
 		q_hlt.filter("run_number", runnum).filter("path_name", hlt_path).filter("first_lumisection_number",ls_start,"GE").filter("last_lumisection_number",ls_start+ls_num_to_avg,"LE")
 		
-		#https://cmsoms.cern.ch/agg/api/v1/hltpathrates?filter[run_number][EQ]=373710&&filter[path_name][EQ]=HLT_PPRefGEDPhoton10_v1&&filter[first_lumisection_number][GE]=7&&filter[last_lumisection_number][LE]=27
-
+		#https://cmsoms.cern.ch/agg/api/v1/hltpathrates?filter[run_number][EQ]=373345&&filter[path_name][EQ]=HLT_PPRefGEDPhoton10_v1&&filter[first_lumisection_number][GE]=7&&filter[last_lumisection_number][LE]=27
+		
 		rate = 0
 		for i in range(ls_num_to_avg):
 			rate += q_hlt.data().json()['data'][i]['attributes']['rate']
@@ -116,5 +133,6 @@ for runnum in runnums:
 		fout.write(str(rate)+ ',')
 	
 	fout.write('\n')
+	r_id += 1
 
 print('Done')
