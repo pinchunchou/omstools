@@ -3,10 +3,10 @@ import util.utility as u
 
 fout = open("rate_monitoring.csv", "w")
 
-ls_starts = [150] # 0 if we want to start at stable beam.
-ls_num_to_avgs = [20] # How many lumisections to be averaged. 
+ls_starts = [45,80,108] # 0 if we want to start at stable beam.
+ls_num_to_avgs = [20,20,20] # How many lumisections to be averaged. 
 
-runnums = [375202] # Run numbers to be used
+runnums = [375252,375256,375259] # Run numbers to be used
 
 #ppref paths
 '''
